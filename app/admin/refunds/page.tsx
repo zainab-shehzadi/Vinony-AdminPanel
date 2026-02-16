@@ -139,7 +139,7 @@ export default function RefundsPage() {
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
+            <div className='flex flex-col gap-1.5'>
               <CardTitle>Transactions</CardTitle>
               <CardDescription>
                 View all transactions. Click on a completed transaction to initiate a refund.

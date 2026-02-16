@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { TransactionsTable } from '@/components/admin/transactions-table'
 import { Transaction } from '@/lib/types'
-import { Download, Filter } from 'lucide-react'
+import { Download, Filter, FunnelX } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -171,6 +171,12 @@ export default function TransactionsPage() {
     })
   }
 
+  const resetFilters = ()=>{
+    setSearchQuery('')
+    setStatusFilter('all')
+    setTypeFilter('all')
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -278,10 +284,14 @@ export default function TransactionsPage() {
                 </div>
 
                 {/* Export */}
-                <div className="w-full sm:w-auto sm:ml-auto">
+                <div className="w-full sm:w-auto sm:ml-auto flex flex-col sm:flex-row gap-3">
                   <Button onClick={handleExport} className="w-full sm:w-auto bg-secondary hover:bg-secondary/90">
                     <Download className="mr-2 h-4 w-4" />
                     Export CSV
+                  </Button>
+                  <Button onClick={resetFilters} className="w-full sm:w-auto bg-secondary hover:bg-secondary/90">
+                    <FunnelX className="mr-2 h-4 w-4" />
+                    Clear Filters
                   </Button>
                 </div>
               </div>
