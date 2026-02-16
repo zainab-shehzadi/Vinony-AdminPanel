@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
@@ -10,6 +10,7 @@ import { Transaction } from '@/lib/types'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle } from 'lucide-react'
 import { mockTransactions } from '@/components/constants/mock'
+import { Pagination } from '@/components/admin/Pagination'
 
 
 
@@ -25,16 +26,34 @@ export default function RefundsPage() {
     completedTransactions: transactions.filter((t) => t.status === 'completed').length,
     totalValue: transactions.reduce((sum, t) => sum + t.total, 0),
   }
+  const [page, setPage] = useState(1); // 1-based
+  const [pageSize, setPageSize] = useState(10);
 
-  const filteredTransactions = transactions.filter((txn) => {
-    const q = searchQuery.trim().toLowerCase()
-    if (!q) return true
-    return (
-      txn.userId.toLowerCase().includes(q) ||
-      txn.id.toLowerCase().includes(q) ||
-      txn.providerRef.toLowerCase().includes(q)
-    )
-  })
+  const filteredTransactions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return transactions;
+
+    return transactions.filter((txn) => {
+      return (
+        txn.userId.toLowerCase().includes(q) ||
+        txn.id.toLowerCase().includes(q) ||
+        txn.providerRef.toLowerCase().includes(q)
+      );
+    });
+  }, [transactions, searchQuery]);
+
+  // reset to first page when search changes
+  useMemo(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const totalItems = filteredTransactions.length;
+
+  const pagedTransactions = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredTransactions.slice(start, start + pageSize);
+  }, [filteredTransactions, page, pageSize]);
+
 
   const handleRefundClick = (transaction: Transaction) => {
     if (transaction.status !== 'completed') {
@@ -136,16 +155,31 @@ export default function RefundsPage() {
           </div>
         </CardHeader>
 
-        <CardContent>
-          {filteredTransactions.length > 0 ? (
-            <RefundTransactionTable
-              transactions={filteredTransactions}
-              onRefundClick={handleRefundClick}
-            />
+        <CardContent className="space-y-4">
+          {totalItems > 0 ? (
+            <>
+              <RefundTransactionTable
+                transactions={pagedTransactions}
+                onRefundClick={handleRefundClick}
+              />
+
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setPage}
+                onPageSizeChange={(s) => {
+                  setPageSize(s);
+                  setPage(1);
+                }}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
+            </>
           ) : (
             <div className="py-8 text-center text-muted-foreground">No transactions found</div>
           )}
         </CardContent>
+
       </Card>
 
       {selectedTransaction && (

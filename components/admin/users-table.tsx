@@ -55,12 +55,12 @@ export function UsersTable({ users, onUserSelect }: UsersTableProps) {
       <Table>
         <TableHeader>
           <TableRow className="bg-primary hover:bg-primary">
-            <TableHead className="font-semibold text-foreground">Email</TableHead>
-            <TableHead className="font-semibold text-foreground">Plan</TableHead>
-            <TableHead className="font-semibold text-foreground">Status</TableHead>
-            <TableHead className="font-semibold text-foreground text-right">Credits</TableHead>
-            <TableHead className="font-semibold text-foreground text-right">Monthly Spend</TableHead>
-            <TableHead className="font-semibold text-foreground">Last Login</TableHead>
+            <TableHead className="font-semibold ">User ID</TableHead>
+            <TableHead className="font-semibold ">Plan</TableHead>
+            <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className="font-semibold text-right">Credits</TableHead>
+            <TableHead className="font-semibold text-right">Monthly Spend</TableHead>
+            <TableHead className="font-semibold ">Last Login</TableHead>
             <TableHead className="w-10"></TableHead>
           </TableRow>
         </TableHeader>
@@ -70,7 +70,7 @@ export function UsersTable({ users, onUserSelect }: UsersTableProps) {
               key={user.id} 
               className="hover:bg-primary/10 cursor-pointer"
             >
-              <TableCell className="font-medium">{user.email}</TableCell>
+              <TableCell className="font-medium">{user.id}</TableCell>
               <TableCell>
                 <Badge variant={getPlanColor(user.plan)} className="capitalize">
                   {user.plan}

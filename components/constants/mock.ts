@@ -32,6 +32,41 @@ export const mockGenerations: Generation[] = [
     cost: 75,
     timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
   },
+  {
+    id: "gen_003",
+    model: "gpt-4",
+    type: "chat",
+    cost: 75,
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
+  },
+  {
+    id: "gen_003",
+    model: "gpt-4",
+    type: "chat",
+    cost: 75,
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
+  },
+  {
+    id: "gen_003",
+    model: "gpt-4",
+    type: "chat",
+    cost: 75,
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
+  },
+  {
+    id: "gen_003",
+    model: "gpt-4",
+    type: "chat",
+    cost: 75,
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
+  },
+  {
+    id: "gen_003",
+    model: "gpt-4",
+    type: "chat",
+    cost: 75,
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 48),
+  },
 ]
 
 

@@ -69,7 +69,6 @@ export function ResetPasswordDialog({
   }
 
   const handleOpenChange = (v: boolean) => {
-    // When closing, clear the form for next open
     if (!v) resetLocal()
     onOpenChange(v)
   }
@@ -114,11 +113,12 @@ export function ResetPasswordDialog({
                 placeholder="Enter current password"
                 autoComplete="current-password"
                 disabled={loading}
+                className="pr-12" // ✅ prevent overlap with eye icon
               />
               <button
                 type="button"
                 onClick={() => setShow((p) => ({ ...p, current: !p.current }))}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60"
                 aria-label={show.current ? "Hide password" : "Show password"}
                 disabled={loading}
               >
@@ -145,11 +145,12 @@ export function ResetPasswordDialog({
                 placeholder={`Enter new password (min ${minPasswordLength})`}
                 autoComplete="new-password"
                 disabled={loading}
+                className="pr-12" // ✅ prevent overlap with eye icon
               />
               <button
                 type="button"
                 onClick={() => setShow((p) => ({ ...p, next: !p.next }))}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60"
                 aria-label={show.next ? "Hide password" : "Show password"}
                 disabled={loading}
               >
@@ -176,11 +177,12 @@ export function ResetPasswordDialog({
                 placeholder="Re-enter new password"
                 autoComplete="new-password"
                 disabled={loading}
+                className="pr-12"
               />
               <button
                 type="button"
                 onClick={() => setShow((p) => ({ ...p, confirm: !p.confirm }))}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60"
                 aria-label={show.confirm ? "Hide password" : "Show password"}
                 disabled={loading}
               >

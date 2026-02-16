@@ -22,12 +22,12 @@ export function UserAdminActionsTab({ user, onBan, onDelete, onOpenReset }: Prop
           </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-1">
           <Button
             onClick={onBan}
             variant="outline"
             disabled={user.status === "banned"}
-            className="h-auto justify-start rounded-xl px-4 py-4 text-left hover:bg-muted/50 hover:text-white"
+            className="h-auto justify-start rounded-xl px-4 py-4 text-left hover:bg-muted/50 hover:text-foreground"
           >
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
@@ -44,11 +44,11 @@ export function UserAdminActionsTab({ user, onBan, onDelete, onOpenReset }: Prop
             </div>
           </Button>
 
-          <Button
+          {/* <Button
             onClick={onOpenReset}
             variant="outline"
             disabled={user.status === "banned" || user.status === "deleted"}
-            className="h-auto justify-start rounded-xl px-4 py-4 text-left hover:bg-muted/50 hover:text-white"
+            className="h-auto justify-start rounded-xl px-4 py-4 text-left hover:bg-muted/50  hover:text-foreground"
           >
             <div className="flex items-start gap-3">
               <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
@@ -61,7 +61,7 @@ export function UserAdminActionsTab({ user, onBan, onDelete, onOpenReset }: Prop
                 </span>
               </div>
             </div>
-          </Button>
+          </Button> */}
         </div>
 
         <Button

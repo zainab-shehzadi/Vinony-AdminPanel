@@ -1,16 +1,15 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from '@/components/ui/separator'
-import { useToast } from '@/hooks/use-toast'
-import { CreditLedgerTable } from '@/components/admin/credit-ledger-table'
-import { AddCreditsForm } from '@/components/admin/add-credits-form'
-import { CreditLedger } from '@/lib/types'
-import { CreditCard, TrendingDown, TrendingUp } from 'lucide-react'
+import { useMemo, useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { CreditLedgerTable } from "@/components/admin/credit-ledger-table";
+import { AddCreditsForm } from "@/components/admin/add-credits-form";
+import { CreditLedger } from "@/lib/types";
+import { CreditCard, TrendingDown, TrendingUp } from "lucide-react";
+import { Pagination } from "@/components/admin/Pagination";
 
 const mockLedger: CreditLedger[] = [
   {
@@ -68,46 +67,74 @@ const mockLedger: CreditLedger[] = [
 ]
 
 export default function CreditsPage() {
-  const { toast } = useToast()
-  const [ledger, setLedger] = useState<CreditLedger[]>(mockLedger)
-  const [searchQuery, setSearchQuery] = useState('')
+  const { toast } = useToast();
+  const [ledger, setLedger] = useState<CreditLedger[]>(mockLedger);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const stats = {
-    totalIssued: ledger.filter((l) => l.delta > 0).reduce((sum, l) => sum + l.delta, 0),
-    totalSpent: Math.abs(ledger.filter((l) => l.delta < 0).reduce((sum, l) => sum + l.delta, 0)),
-    totalRefunded: ledger.filter((l) => l.source === 'refund').reduce((sum, l) => sum + Math.abs(l.delta), 0),
-  }
+  // ✅ pagination state (for ledger)
+  const [page, setPage] = useState(1); // 1-based
+  const [pageSize, setPageSize] = useState(10);
 
-  const filteredLedger = ledger.filter(
-    (item) =>
-      item.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.reason.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const stats = useMemo(() => {
+    const totalIssued = ledger.filter((l) => l.delta > 0).reduce((sum, l) => sum + l.delta, 0);
+    const totalSpent = Math.abs(ledger.filter((l) => l.delta < 0).reduce((sum, l) => sum + l.delta, 0));
+    const totalRefunded = ledger
+      .filter((l) => l.source === "refund")
+      .reduce((sum, l) => sum + Math.abs(l.delta), 0);
+
+    return { totalIssued, totalSpent, totalRefunded };
+  }, [ledger]);
+
+  // ✅ filter ledger
+  const filteredLedger = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return ledger;
+
+    return ledger.filter((item) => {
+      return (
+        item.userId.toLowerCase().includes(q) ||
+        item.reason.toLowerCase().includes(q)
+      );
+    });
+  }, [ledger, searchQuery]);
+
+  // ✅ reset page when search changes
+  useMemo(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  // ✅ paginate after filtering
+  const totalItems = filteredLedger.length;
+
+  const pagedLedger = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredLedger.slice(start, start + pageSize);
+  }, [filteredLedger, page, pageSize]);
 
   const handleAddCredits = (data: {
-    userId: string
-    amount: number
-    reason: string
-    referenceId?: string
+    userId: string;
+    amount: number;
+    reason: string;
+    referenceId?: string;
   }) => {
     const newLedgerEntry: CreditLedger = {
       id: `ledger_${Date.now()}`,
       userId: data.userId,
       delta: data.amount,
-      balanceAfter: data.amount, // Mock - would be calculated from user's current balance
-      adminId: 'admin_001',
+      balanceAfter: data.amount, // mock
+      adminId: "admin_001",
       timestamp: new Date(),
       reason: data.reason,
-      source: 'manual',
+      source: "manual",
       referenceId: data.referenceId,
-    }
+    };
 
-    setLedger([newLedgerEntry, ...ledger])
+    setLedger((prev) => [newLedgerEntry, ...prev]);
     toast({
-      title: 'Success',
+      title: "Success",
       description: `Added ${data.amount} credits to ${data.userId}`,
-    })
-  }
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -137,7 +164,9 @@ export default function CreditsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{(stats.totalSpent / 1000).toFixed(0)}K</div>
-            <p className="text-xs text-muted-foreground">{Math.round((stats.totalSpent / stats.totalIssued) * 100)}% utilization</p>
+            <p className="text-xs text-muted-foreground">
+              {stats.totalIssued > 0 ? Math.round((stats.totalSpent / stats.totalIssued) * 100) : 0}% utilization
+            </p>
           </CardContent>
         </Card>
 
@@ -164,9 +193,7 @@ export default function CreditsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Add or Deduct Credits</CardTitle>
-              <CardDescription>
-                Manual credit adjustments for users. All actions are logged.
-              </CardDescription>
+              <CardDescription>Manual credit adjustments for users. All actions are logged.</CardDescription>
             </CardHeader>
             <CardContent>
               <AddCreditsForm onSubmit={handleAddCredits} />
@@ -179,6 +206,7 @@ export default function CreditsPage() {
             <CardHeader>
               <CardTitle>Credit Ledger</CardTitle>
               <CardDescription>Transaction history for all credit operations</CardDescription>
+
               <div className="mt-4">
                 <Input
                   placeholder="Search by user ID or reason..."
@@ -188,20 +216,32 @@ export default function CreditsPage() {
                 />
               </div>
             </CardHeader>
-            <CardContent>
-              {filteredLedger.length > 0 ? (
-                <CreditLedgerTable ledger={filteredLedger} />
+
+            <CardContent className="space-y-4">
+              {totalItems > 0 ? (
+                <>
+                  <CreditLedgerTable ledger={pagedLedger} />
+
+                  {/* ✅ Pagination */}
+                  <Pagination
+                    page={page}
+                    pageSize={pageSize}
+                    totalItems={totalItems}
+                    onPageChange={setPage}
+                    onPageSizeChange={(s) => {
+                      setPageSize(s);
+                      setPage(1);
+                    }}
+                    pageSizeOptions={[5, 10, 20, 50]}
+                  />
+                </>
               ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No ledger entries found
-                </div>
+                <div className="text-center py-8 text-muted-foreground">No ledger entries found</div>
               )}
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-
- 
     </div>
-  )
+  );
 }

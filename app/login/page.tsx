@@ -1,7 +1,6 @@
 import { BrandingPanel } from "@/components/admin/branding-panel"
 import { LoginForm } from "@/components/admin/login-form"
-import { Shield, Fingerprint } from "lucide-react"
-import Image from "next/image"
+
 
 export default function Page() {
   return (
@@ -17,17 +16,7 @@ export default function Page() {
 
         <div className="relative z-10 w-full max-w-[420px] flex flex-col gap-8">
           <div className="flex lg:hidden items-center gap-3 justify-center">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/25 overflow-hidden">
-              <Image
-                src="/logo.png"
-                alt="Nexus Admin Logo"
-                width={44}
-                height={44}
-                className="h-full w-full object-contain"
-                priority
-              />
-            </div>
-
+      
           </div>
 
           {/* Header */}

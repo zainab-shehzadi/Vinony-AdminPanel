@@ -1,6 +1,6 @@
 'use client'
 
-import { BarChart, Bar, LineChart, Line,  ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
+import { BarChart, Bar, LineChart, Line, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Users, TrendingUp, DollarSign, RefreshCw, Activity } from 'lucide-react'
 import { AdminActionTable } from '@/components/admin/admin-action-table'
@@ -114,53 +114,149 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={dashboardData.usersPerDay}>
+              <LineChart
+                data={dashboardData.usersPerDay}
+                margin={{ top: 10, right: 12, left: 0, bottom: 28 }} // ✅ adds space below
+              >
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                <XAxis
+                  dataKey="date"
+                  stroke="hsl(var(--muted-foreground))"
+                  height={30}
+                  tickMargin={30}
+                />
                 <YAxis stroke="hsl(var(--muted-foreground))" />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '6px',
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "6px",
                   }}
                 />
                 <Line type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
+
         </Card>
 
-       <Card>
-        <CardHeader>
-          <CardTitle>Credits Flow (Last 5 Weeks)</CardTitle>
-          <CardDescription>Issued, spent, and refunded credits</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={dashboardData.creditsFlow}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" />
-              <YAxis stroke="hsl(var(--muted-foreground))" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '6px',
-                }}
-              />
-              <Legend />
-              <Bar dataKey="issued" fill={CHART_COLORS[0]} name="Issued" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="spent" fill={CHART_COLORS[1]} name="Spent" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="refunded" fill={CHART_COLORS[3]} name="Refunded" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Credits Flow (Last 5 Weeks)</CardTitle>
+            <CardDescription>Issued, spent, and refunded credits</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-4">
+            <ResponsiveContainer width="100%" height={320}>
+              <BarChart
+                data={dashboardData.creditsFlow}
+                margin={{ top: 8, right: 12, left: 0, bottom: 30 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <Legend
+                  verticalAlign="top"
+                  align="right"
+                  height={28}
+                  wrapperStyle={{ paddingBottom: 8 }}
+                />
+
+                <XAxis
+                  dataKey="month"
+                  stroke="hsl(var(--muted-foreground))"
+                  height={32}
+                  tickMargin={12}
+                />
+                <YAxis stroke="hsl(var(--muted-foreground))" />
+
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "6px",
+                  }}
+                />
+
+                <Bar dataKey="issued" fill={CHART_COLORS[0]} name="Issued" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="spent" fill={CHART_COLORS[1]} name="Spent" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="refunded" fill={CHART_COLORS[3]} name="Refunded" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+
+
+        </Card>
       </div>
 
-      {/* Credits Flow Chart */}
-    {/* Tables */}
+      {/* Tables */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Recent Transactions */}
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div className="min-w-0">
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Latest payments and top-ups</CardDescription>
+            </div>
+
+            <Button asChild size="sm" variant="outline" className="shrink-0 bg-primary text-white">
+              <Link href="/admin/transactions">View All</Link>
+            </Button>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            {dashboardData.recentTransactions.map((t) => (
+              <div
+                key={t.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
+              >
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium truncate">{t.userEmail}</span>
+                    {statusBadge(t.status)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t.type === "subscription" ? "Subscription" : "Top-up"} • {t.createdAt}
+                  </p>
+                </div>
+                <div className="text-sm font-semibold">${t.amount.toFixed(2)}</div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Low Credits */}
+        <Card>
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div className="min-w-0">
+              <CardTitle>Low Credit Users</CardTitle>
+              <CardDescription>Users that may need a top-up</CardDescription>
+            </div>
+
+            <Button asChild size="sm" variant="outline" className="shrink-0 bg-primary text-white">
+              <Link href="/admin/credits?filter=low">View All</Link>
+            </Button>
+          </CardHeader>
+
+          <CardContent className="space-y-3">
+            {dashboardData.lowCreditUsers.map((u) => (
+              <div
+                key={u.id}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border p-3"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{u.email}</p>
+                  <p className="text-xs text-muted-foreground">
+                    Remaining: {u.creditsRemaining} credits
+                  </p>
+                </div>
+
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/credits">Add Credits</Link>
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+      {/* Tables */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {/* Recent Transactions */}
         <Card>
@@ -199,9 +295,9 @@ export default function DashboardPage() {
                   <p className="text-sm font-medium truncate">{u.email}</p>
                   <p className="text-xs text-muted-foreground">Remaining: {u.creditsRemaining} credits</p>
                 </div>
-              <Button asChild size="sm" variant="outline">
-      <Link href="/admin/credits">Add Credits</Link>
-    </Button>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/credits">Add Credits</Link>
+                </Button>
               </div>
             ))}
           </CardContent>

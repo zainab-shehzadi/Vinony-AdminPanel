@@ -40,7 +40,7 @@ export function AdminActionTable({ actions }: AdminActionTableProps) {
     <div className="rounded-lg border border-border overflow-hidden">
       <Table>
         <TableHeader>
-          <TableRow className="bg-primary hover:bg-primary">
+          <TableRow className="bg-primary hover:bg-primary text-white">
             <TableHead className="font-semibold">Action</TableHead>
             <TableHead className="font-semibold">Admin</TableHead>
             <TableHead className="font-semibold">Entity</TableHead>

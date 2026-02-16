@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Pagination } from '@/components/admin/Pagination'
 
 const mockTransactions: Transaction[] = [
   {
@@ -98,6 +99,9 @@ export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<'all' | Transaction['type']>('all')
   const [statusFilter, setStatusFilter] = useState<'all' | Transaction['status']>('all')
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
 
   const stats = {
     totalTransactions: transactions.length,
@@ -110,15 +114,31 @@ export default function TransactionsPage() {
       .reduce((sum, t) => sum + t.vat, 0),
   }
 
-  const filteredTransactions = transactions.filter((txn) => {
-    const matchesSearch =
-      txn.userId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      txn.providerRef.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesType = typeFilter === 'all' || txn.type === typeFilter
-    const matchesStatus = statusFilter === 'all' || txn.status === statusFilter
-    return matchesSearch && matchesType && matchesStatus
-  })
+  const filteredTransactions = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
+    return transactions.filter((txn) => {
+      const matchesSearch =
+        txn.userId.toLowerCase().includes(q) ||
+        txn.id.toLowerCase().includes(q) ||
+        txn.providerRef.toLowerCase().includes(q);
+
+      const matchesType = typeFilter === "all" || txn.type === typeFilter;
+      const matchesStatus = statusFilter === "all" || txn.status === statusFilter;
+
+      return matchesSearch && matchesType && matchesStatus;
+    });
+  }, [transactions, searchQuery, typeFilter, statusFilter]);
+
+  const totalItems = filteredTransactions.length;
+
+  const pagedTransactions = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredTransactions.slice(start, start + pageSize);
+  }, [filteredTransactions, page, pageSize]);
+  useMemo(() => {
+    setPage(1);
+  }, [searchQuery, typeFilter, statusFilter]);
 
   const handleExport = () => {
     const csv = [
@@ -267,15 +287,30 @@ export default function TransactionsPage() {
               </div>
 
             </CardHeader>
-            <CardContent>
-              {filteredTransactions.length > 0 ? (
-                <TransactionsTable transactions={filteredTransactions} />
+            <CardContent className="space-y-4">
+              {totalItems > 0 ? (
+                <>
+                  <TransactionsTable transactions={pagedTransactions} />
+
+                  <Pagination
+                    page={page}
+                    pageSize={pageSize}
+                    totalItems={totalItems}
+                    onPageChange={setPage}
+                    onPageSizeChange={(s) => {
+                      setPageSize(s);
+                      setPage(1);
+                    }}
+                    pageSizeOptions={[5, 10, 20, 50]}
+                  />
+                </>
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   No transactions found
                 </div>
               )}
             </CardContent>
+
           </Card>
         </TabsContent>
 

@@ -1,19 +1,15 @@
-'use client'
+"use client";
 
-import { useState, useCallback } from 'react'
-import { Search} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { UsersTable } from '@/components/admin/users-table'
-import { User } from '@/lib/types'
-import { UserDetailDrawer } from '@/components/admin/user-drawer/UserDetailDrawer'
+import { useEffect, useMemo, useState } from "react";
+import { Search } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UsersTable } from "@/components/admin/users-table";
+import { User } from "@/lib/types";
+import { UserDetailDrawer } from "@/components/admin/user-drawer/UserDetailDrawer";
+import { Pagination } from "@/components/admin/Pagination";
+import { Button } from "@/components/ui/button";
 
 const mockUsers: User[] = [
   {
@@ -68,26 +64,54 @@ const mockUsers: User[] = [
 ]
 
 export default function UsersPage() {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [planFilter, setPlanFilter] = useState<'all' | 'free' | 'pro' | 'enterprise'>('all')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'suspended' | 'banned'>('all')
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [planFilter, setPlanFilter] = useState<"all" | "free" | "pro" | "enterprise">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended" | "banned">("all");
 
-  const filteredUsers = useCallback(() => {
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const filteredUsers = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+
     return mockUsers.filter((user) => {
-      const matchesSearch = user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.id.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesPlan = planFilter === 'all' || user.plan === planFilter
-      const matchesStatus = statusFilter === 'all' || user.status === statusFilter
-      return matchesSearch && matchesPlan && matchesStatus
-    })
-  }, [searchQuery, planFilter, statusFilter])
+      const matchesSearch =
+        q.length === 0 ||
+        user.email.toLowerCase().includes(q) ||
+        user.id.toLowerCase().includes(q);
+
+      const matchesPlan = planFilter === "all" || user.plan === planFilter;
+      const matchesStatus = statusFilter === "all" || user.status === statusFilter;
+
+      return matchesSearch && matchesPlan && matchesStatus;
+    });
+  }, [searchQuery, planFilter, statusFilter]);
+  const handleReset = () => {
+    setSearchQuery("");
+    setPlanFilter("all");
+    setStatusFilter("all");
+    setPage(1);
+    setPageSize(10);
+  };
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery, planFilter, statusFilter]);
+
+  const totalItems = filteredUsers.length;
+
+  const pagedUsers = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, page, pageSize]);
 
   const handleUserSelect = (user: User) => {
-    setSelectedUser(user)
-    setIsDrawerOpen(true)
-  }
+    setSelectedUser(user);
+    setIsDrawerOpen(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -105,7 +129,7 @@ export default function UsersPage() {
         <CardContent className="space-y-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-end">
             <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">Search by email or ID</label>
+              <label className="mb-2 block text-sm font-medium">Search by email or ID</label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -118,8 +142,8 @@ export default function UsersPage() {
             </div>
 
             <div className="w-full md:w-48">
-              <label className="text-sm font-medium mb-2 block">Plan</label>
-              <Select value={planFilter} onValueChange={(v: any) => setPlanFilter(v)}>
+              <label className="mb-2 block text-sm font-medium">Plan</label>
+              <Select value={planFilter} onValueChange={(v) => setPlanFilter(v as any)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -133,8 +157,8 @@ export default function UsersPage() {
             </div>
 
             <div className="w-full md:w-48">
-              <label className="text-sm font-medium mb-2 block">Status</label>
-              <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+              <label className="mb-2 block text-sm font-medium">Status</label>
+              <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -146,9 +170,19 @@ export default function UsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="w-full md:w-auto md:ml-auto">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full md:w-auto border border-border bg-primary text-white"
+                onClick={handleReset}
+                disabled={searchQuery === "" && planFilter === "all" && statusFilter === "all"}
+              >
+                Reset
+              </Button>
+            </div>
+
           </div>
-
-
         </CardContent>
       </Card>
 
@@ -158,14 +192,26 @@ export default function UsersPage() {
           <CardTitle>User Accounts</CardTitle>
           <CardDescription>Click on a user to view details and take actions</CardDescription>
         </CardHeader>
-        <CardContent>
-          {filteredUsers().length > 0 ? (
-            <UsersTable 
-              users={filteredUsers()} 
-              onUserSelect={handleUserSelect}
-            />
+
+        <CardContent className="space-y-4">
+          {totalItems > 0 ? (
+            <>
+              <UsersTable users={pagedUsers} onUserSelect={handleUserSelect} />
+
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setPage}
+                onPageSizeChange={(s) => {
+                  setPageSize(s);
+                  setPage(1);
+                }}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
+            </>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="py-8 text-center text-muted-foreground">
               No users found matching your filters
             </div>
           )}
@@ -178,8 +224,7 @@ export default function UsersPage() {
           open={isDrawerOpen}
           onOpenChange={setIsDrawerOpen}
         />
-
       )}
     </div>
-  )
+  );
 }

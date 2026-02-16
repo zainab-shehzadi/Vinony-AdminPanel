@@ -8,6 +8,7 @@ import { mockModels } from "@/components/constants/mock";
 import { ModelHealthStats } from "@/components/admin/model/model-health-stats";
 import { ModelToggleDialog } from "@/components/admin/model/model-toggle-dialog";
 import { ModelHealthTable } from "@/components/admin/model/model-health-table";
+import { Pagination } from "@/components/admin/Pagination";
 
 type DialogMode = "disable" | "enable";
 
@@ -18,6 +19,10 @@ export default function ModelsPage() {
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
   const [dialogMode, setDialogMode] = useState<DialogMode | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // ✅ pagination state (reusable in every page)
+  const [page, setPage] = useState(1); // 1-based
+  const [pageSize, setPageSize] = useState(10);
 
   const selectedModel = useMemo(
     () => models.find((m) => m.id === selectedModelId) ?? null,
@@ -73,6 +78,18 @@ export default function ModelsPage() {
     closeDialog();
   };
 
+  // ✅ slice data for current page
+  const totalItems = models.length;
+
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  // keep page valid when data changes
+  if (page > totalPages) setPage(totalPages);
+
+  const pagedModels = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return models.slice(start, start + pageSize);
+  }, [models, page, pageSize]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -87,11 +104,26 @@ export default function ModelsPage() {
           <CardTitle>All Models</CardTitle>
           <CardDescription>Disable/enable models to manage availability</CardDescription>
         </CardHeader>
-        <CardContent>
+
+        <CardContent className="space-y-4">
           {models.length ? (
-            <ModelHealthTable models={models} onToggleModel={handleToggleModel} />
+            <>
+              <ModelHealthTable models={pagedModels} onToggleModel={handleToggleModel} />
+
+              <Pagination
+                page={page}
+                pageSize={pageSize}
+                totalItems={totalItems}
+                onPageChange={setPage}
+                onPageSizeChange={(s) => {
+                  setPageSize(s);
+                  setPage(1); // ✅ reset to first page
+                }}
+                pageSizeOptions={[5, 10, 20, 50]}
+              />
+            </>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">No models found</div>
+            <div className="py-8 text-center text-muted-foreground">No models found</div>
           )}
         </CardContent>
       </Card>
