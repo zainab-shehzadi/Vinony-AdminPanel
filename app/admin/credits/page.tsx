@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -11,6 +11,7 @@ import { CreditLedger } from "@/lib/types";
 import { CreditCard, TrendingDown, TrendingUp } from "lucide-react";
 import { Pagination } from "@/components/admin/Pagination";
 
+// ... mockLedger stays the same
 const mockLedger: CreditLedger[] = [
   {
     id: 'ledger_001',
@@ -65,13 +66,11 @@ const mockLedger: CreditLedger[] = [
     referenceId: 'refund_001',
   },
 ]
-
 export default function CreditsPage() {
   const { toast } = useToast();
   const [ledger, setLedger] = useState<CreditLedger[]>(mockLedger);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // ✅ pagination state (for ledger)
   const [page, setPage] = useState(1); // 1-based
   const [pageSize, setPageSize] = useState(10);
 
@@ -85,25 +84,20 @@ export default function CreditsPage() {
     return { totalIssued, totalSpent, totalRefunded };
   }, [ledger]);
 
-  // ✅ filter ledger
   const filteredLedger = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return ledger;
 
     return ledger.filter((item) => {
-      return (
-        item.userId.toLowerCase().includes(q) ||
-        item.reason.toLowerCase().includes(q)
-      );
+      return item.userId.toLowerCase().includes(q) || item.reason.toLowerCase().includes(q);
     });
   }, [ledger, searchQuery]);
 
-  // ✅ reset page when search changes
-  useMemo(() => {
+  // ✅ side-effect belongs in useEffect
+  useEffect(() => {
     setPage(1);
   }, [searchQuery]);
 
-  // ✅ paginate after filtering
   const totalItems = filteredLedger.length;
 
   const pagedLedger = useMemo(() => {
@@ -113,15 +107,26 @@ export default function CreditsPage() {
 
   const handleAddCredits = (data: {
     userId: string;
-    amount: number;
+    amount: number; // positive = add, negative = deduct
     reason: string;
     referenceId?: string;
   }) => {
+    const amount = Number(data.amount);
+
+    if (!Number.isFinite(amount) || amount === 0) {
+      toast({
+        title: "Invalid amount",
+        description: "Please enter a non-zero numeric amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const newLedgerEntry: CreditLedger = {
       id: `ledger_${Date.now()}`,
       userId: data.userId,
-      delta: data.amount,
-      balanceAfter: data.amount, // mock
+      delta: amount,
+      balanceAfter: amount, // NOTE: replace with real balance-from-API in production
       adminId: "admin_001",
       timestamp: new Date(),
       reason: data.reason,
@@ -130,9 +135,17 @@ export default function CreditsPage() {
     };
 
     setLedger((prev) => [newLedgerEntry, ...prev]);
+
+    const isDeduction = amount < 0;
+    const abs = Math.abs(amount);
+
     toast({
-      title: "Success",
-      description: `Added ${data.amount} credits to ${data.userId}`,
+      title: isDeduction ? "Credits deducted" : "Credits added",
+      description: isDeduction
+        ? `Successfully deducted ${abs} credits.`
+        : `Successfully added ${abs} credits.`,
+      // optional: if your toast supports variants; keep/remove as per your setup
+      variant: isDeduction ? "destructive" : "default",
     });
   };
 
@@ -222,7 +235,6 @@ export default function CreditsPage() {
                 <>
                   <CreditLedgerTable ledger={pagedLedger} />
 
-                  {/* ✅ Pagination */}
                   <Pagination
                     page={page}
                     pageSize={pageSize}

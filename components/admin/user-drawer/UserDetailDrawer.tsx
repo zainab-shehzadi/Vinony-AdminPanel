@@ -141,7 +141,7 @@ export function UserDetailDrawer({ user, open, onOpenChange }: UserDetailDrawerP
 
           <DrawerClose className="mx-6 mb-6" asChild>
             <div className="flex justify-end">
-              <Button variant="outline" className="w-auto bg-primary px-4 py-2 text-sm">
+              <Button variant="outline" className="w-auto bg-primary text-background px-4 py-2 text-sm">
                 Close
               </Button>
             </div>

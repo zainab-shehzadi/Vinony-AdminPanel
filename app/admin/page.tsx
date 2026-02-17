@@ -256,7 +256,53 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    
+      {/* Tables */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        {/* Recent Transactions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Transactions</CardTitle>
+            <CardDescription>Latest payments and top-ups</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {dashboardData.recentTransactions.map((t) => (
+              <div key={t.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium truncate">{t.userEmail}</span>
+                    {statusBadge(t.status)}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {t.type === "subscription" ? "Subscription" : "Top-up"} • {t.createdAt}
+                  </p>
+                </div>
+                <div className="text-sm font-semibold">${t.amount.toFixed(2)}</div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Low Credits */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Low Credit Users</CardTitle>
+            <CardDescription>Users that may need a top-up</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {dashboardData.lowCreditUsers.map((u) => (
+              <div key={u.id} className="flex items-center justify-between gap-3 rounded-lg border border-border p-3">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{u.email}</p>
+                  <p className="text-xs text-muted-foreground">Remaining: {u.creditsRemaining} credits</p>
+                </div>
+                <Button asChild size="sm" variant="outline">
+                  <Link href="/admin/credits">Add Credits</Link>
+                </Button>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Recent Admin Actions */}
       <Card>
