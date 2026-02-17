@@ -56,7 +56,7 @@ export function AdminHeader() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center ">
             {/* Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -65,12 +65,18 @@ export function AdminHeader() {
                   className="h-9 rounded-xl px-2 sm:px-3 hover:bg-accen flex items-center gap-2"
                 >
                   <div className="h-8 w-8 rounded-full bg-primary/15 ring-1 ring-primary/25 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-primary">AU</span>
+                    <span className="text-xs font-semibold text-primary">
+                      AU
+                    </span>
                   </div>
 
                   <div className="hidden sm:flex flex-col items-start leading-tight">
-                    <span className="text-sm font-semibold text-foreground">Admin</span>
-                    <span className="text-[11px] text-muted-foreground">admin@vinony.com</span>
+                    <span className="text-sm font-semibold text-foreground">
+                      Admin
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      admin@vinony.com
+                    </span>
                   </div>
 
                   <ChevronDown className="hidden sm:block h-4 w-4 text-muted-foreground" />
@@ -79,8 +85,12 @@ export function AdminHeader() {
 
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-2">
-                  <p className="text-sm font-semibold text-foreground">Admin User</p>
-                  <p className="text-xs text-muted-foreground truncate">admin@vinony.com</p>
+                  <p className="text-sm font-semibold text-foreground">
+                    Admin User
+                  </p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    admin@vinony.com
+                  </p>
                 </div>
 
                 <DropdownMenuSeparator />

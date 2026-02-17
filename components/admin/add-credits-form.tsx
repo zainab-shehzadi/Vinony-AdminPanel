@@ -192,11 +192,11 @@ export function AddCreditsForm({ onSubmit }: AddCreditsFormProps) {
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <p className="text-foreground text-base">User</p>
-            <p className="font-medium">{userId || '—'}</p>
+            <p className="font-medium truncate">{userId || '—'}</p>
           </div>
           <div>
             <p className="text-foreground text-base ">Change</p>
-            <p className={`font-medium ${operation === 'add' ? 'text-green-600' : 'text-red-600'}`}>
+            <p className={`font-medium truncate ${operation === 'add' ? 'text-green-600' : 'text-red-600'}`}>
               {operation === 'add' ? '+' : '-'}{amount || '0'} credits
             </p>
           </div>
